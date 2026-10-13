@@ -15,9 +15,13 @@ def build_prompt(page_text):
     """拼出要发给模型的提示词：告诉它抽哪些字段、按什么格式返回。"""
     field_lines = "\n".join(f"- {name}: {desc}" for name, desc in FIELDS.items())
     return (
-        "你是一个网页信息抽取助手。下面是一段网页正文，"
-        "请从中抽取指定字段，并以 json 格式返回，只返回 json，不要任何解释。\n\n"
-        f"需要抽取的字段：\n{field_lines}\n\n"
+        "你是一个网页信息抽取助手。下面是一段招聘网页的正文。"
+        "里面可能同时列出了好几个岗位，请把每一个岗位都抽出来，不要只抽第一个。\n\n"
+        f"每个岗位需要抽取的字段：\n{field_lines}\n\n"
+        "请以 json 格式返回，格式固定为：\n"
+        '{"jobs": [{"字段名": "值"}, {"字段名": "值"}]}\n'
+        "只返回 json，不要任何解释。原文里没有的字段填 null，不要编造。"
+        "如果整页只招一个岗位，jobs 里就只有一项。\n\n"
         f"网页正文：\n{page_text}"
     )
 
@@ -63,8 +67,14 @@ def parse_json(reply):
     return obj
 
 
-def extract_fields(page_text):
-    """抽取主流程：拼提示词 -> 调模型 -> 解析结果。"""
+def extract_jobs(page_text):
+    """抽取主流程：拼提示词 -> 调模型 -> 解析结果，返回岗位列表。"""
     prompt = build_prompt(page_text)
     reply = call_model(prompt)
-    return parse_json(reply)
+    data = parse_json(reply)
+
+    jobs = data.get("jobs")
+    if not isinstance(jobs, list):
+        # 模型没按约定的格式返回时退一步，把它当成只有一个岗位
+        jobs = [data]
+    return jobs

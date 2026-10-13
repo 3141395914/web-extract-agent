@@ -9,30 +9,33 @@ import os
 import sys
 
 from config import DEFAULT_URLS, FIELDS
-from extract import extract_fields
+from extract import extract_jobs
 from fetch import fetch_page_text
 
 OUTPUT_DIR = "output"
 
 
 def process(url):
-    """处理单个网址，返回一条记录。"""
+    """处理单个网址，返回这个页面里的岗位列表。"""
     print(f"[1/3] 抓取网页：{url}")
     page_text = fetch_page_text(url)
     print(f"      正文长度 {len(page_text)} 字符")
 
-    print("[2/3] 调用模型抽取字段...")
-    record = extract_fields(page_text)
+    print("[2/3] 调用模型抽取岗位...")
+    jobs = extract_jobs(page_text)
 
-    print("[3/3] 抽取完成")
-    return record
+    print(f"[3/3] 抽取完成，这个页面共 {len(jobs)} 个岗位")
+    for job in jobs:
+        job["url"] = url  # 每个岗位都记下它来自哪个页面
+    return jobs
 
 
 def save_csv(records, path):
     """把结果写成 CSV，列的顺序跟 config.py 里定义的字段一致。"""
     columns = ["url"] + list(FIELDS.keys())
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=columns)
+        # extrasaction="ignore"：模型多返回了用不上的字段时忽略，不要报错
+        writer = csv.DictWriter(f, fieldnames=columns, extrasaction="ignore")
         writer.writeheader()
         for row in records:
             writer.writerow(row)
@@ -48,10 +51,10 @@ def main():
     records = []
     for url in urls:
         try:
-            record = process(url)
-            record["url"] = url
-            records.append(record)
-            print(f"      抽取结果：{record}")
+            jobs = process(url)
+            records.extend(jobs)
+            for job in jobs:
+                print(f"      {job}")
         except Exception as e:
             print(f"      这一条失败了：{type(e).__name__}: {e}")
 
@@ -62,7 +65,7 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = os.path.join(OUTPUT_DIR, "result.csv")
     save_csv(records, path)
-    print(f"\n共 {len(records)} 条结果，已保存到 {path}")
+    print(f"\n共 {len(records)} 个岗位，已保存到 {path}")
 
 
 if __name__ == "__main__":
