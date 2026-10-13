@@ -8,7 +8,7 @@ import csv
 import os
 import sys
 
-from config import FIELDS
+from config import DEFAULT_URLS, FIELDS
 from extract import extract_fields
 from fetch import fetch_page_text
 
@@ -41,8 +41,9 @@ def save_csv(records, path):
 def main():
     urls = sys.argv[1:]
     if not urls:
-        print("用法：python main.py <网址1> <网址2> ...")
-        return
+        urls = DEFAULT_URLS
+        print("没有传入网址，使用 config.py 里配置的示例链接")
+        print("想换网址就在命令行里写：python main.py <网址1> <网址2> ...\n")
 
     records = []
     for url in urls:

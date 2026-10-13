@@ -29,3 +29,8 @@ MAX_CHARS = 6000
 
 # 网络请求的超时时间（秒）
 TIMEOUT = 30
+
+# 没有在命令行里传网址时，默认跑这几条，方便直接点"运行"按钮
+DEFAULT_URLS = [
+    "https://job.haut.edu.cn/module/position_brief_detail/id-115108/nid-8782",
+]
