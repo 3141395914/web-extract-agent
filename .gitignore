@@ -1,0 +1,15 @@
+# 密钥绝对不能提交，这条最重要
+.env
+
+# Python 运行时产生的缓存
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 抓取结果
+output/
+
+# 编辑器
+.vscode/
+.idea/
