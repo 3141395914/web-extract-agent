@@ -30,6 +30,12 @@ MAX_CHARS = 6000
 # 网络请求的超时时间（秒）
 TIMEOUT = 30
 
+# 抽取结果没通过核对时，最多重新抽取几次
+MAX_RETRY = 2
+
+# 接口请求失败时最多重试几次（接口偶尔会返回 5xx 或者连接中断）
+MAX_API_RETRY = 3
+
 # 没有在命令行里传网址时，默认跑这几条，方便直接点"运行"按钮
 DEFAULT_URLS = [
     "https://job.haut.edu.cn/module/position_brief_detail/id-115108/nid-8782",
