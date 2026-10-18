@@ -13,7 +13,9 @@ from config import DEFAULT_URLS, FIELDS
 from extract import extract_jobs_checked
 from fetch import fetch_page_text
 
-OUTPUT_DIR = "output"
+# 同样锁定项目根目录，避免结果文件跟着工作目录到处跑
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 
 
 def process(url):

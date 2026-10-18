@@ -7,7 +7,10 @@ import hashlib
 import json
 import os
 
-CACHE_DIR = "cache"
+# __file__ 是当前这个文件的路径，取它的上一级就是项目根目录。
+# 这样不管你在哪个目录下运行程序，缓存都固定建在项目里，不会跑丢。
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CACHE_DIR = os.path.join(BASE_DIR, "cache")
 
 
 def url_to_filename(url):
