@@ -8,6 +8,7 @@ import csv
 import os
 import sys
 
+import cache
 from config import DEFAULT_URLS, FIELDS
 from extract import extract_jobs_checked
 from fetch import fetch_page_text
@@ -17,10 +18,17 @@ OUTPUT_DIR = "output"
 
 def process(url):
     """处理单个网址，返回这个页面里的岗位列表。"""
+    cached_jobs = cache.load(url)
+    if cached_jobs is not None:
+        print(f"[1/3] 命中缓存，直接读取上次的结果：{url}")
+        print(f"      共 {len(cached_jobs)} 个岗位，没有调用模型")
+        for job in cached_jobs:
+            job["url"] = url
+        return cached_jobs
+
     print(f"[1/3] 抓取网页：{url}")
     page_text = fetch_page_text(url)
     print(f"      正文长度 {len(page_text)} 字符")
-
     print("[2/3] 调用模型抽取岗位，并核对每个字段有没有依据...")
     jobs, retries, bad_fields = extract_jobs_checked(page_text)
 
@@ -35,6 +43,8 @@ def process(url):
     print(f"[3/3] 抽取完成，这个页面共 {len(jobs)} 个岗位")
     for job in jobs:
         job["url"] = url  # 每个岗位都记下它来自哪个页面
+
+    cache.save(url, jobs)
     return jobs
 
 

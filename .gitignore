@@ -9,6 +9,7 @@ venv/
 
 # 抓取结果
 output/
+cache/
 
 # 编辑器
 .vscode/
