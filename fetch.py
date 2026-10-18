@@ -25,7 +25,15 @@ def html_to_text(html):
     text = soup.get_text(separator="\n")
     lines = [line.strip() for line in text.splitlines()]
     lines = [line for line in lines if line]  # 丢掉空行
-    return "\n".join(lines)[:MAX_CHARS]
+    text = "\n".join(lines)
+
+    # 页面底部通常挂着「相关职位信息」，那是网站推荐的其他职位，不是这份简章招的岗位。
+    # 评测时发现模型会把它一起抽出来，导致多抽，所以从这一行往后全部丢掉。
+    cut = text.find("相关职位信息")
+    if cut != -1:
+        text = text[:cut]
+
+    return text[:MAX_CHARS]
 
 
 def fetch_page_text(url):

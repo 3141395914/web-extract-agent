@@ -102,6 +102,10 @@ def extract_jobs(page_text, hint=None):
     if not isinstance(jobs, list):
         # 模型没按约定的格式返回时退一步，把它当成只有一个岗位
         jobs = [data]
+
+    # 没有岗位名称的记录不算一个岗位。页面里根本没有岗位时，
+    # 模型有时会硬返回一条只有公司名的空记录，这种要丢掉。
+    jobs = [job for job in jobs if job.get("job_title")]
     return jobs
 
 
