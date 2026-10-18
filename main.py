@@ -12,6 +12,7 @@ import cache
 from config import DEFAULT_URLS, FIELDS
 from extract import extract_jobs_checked
 from fetch import fetch_page_text
+from ncss_api import fetch_corp_jobs, parse_corp_id
 
 # 同样锁定项目根目录，避免结果文件跟着工作目录到处跑
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,21 +29,28 @@ def process(url):
             job["url"] = url
         return cached_jobs
 
-    print(f"[1/3] 抓取网页：{url}")
-    page_text = fetch_page_text(url)
-    print(f"      正文长度 {len(page_text)} 字符")
-    print("[2/3] 调用模型抽取岗位，并核对每个字段有没有依据...")
-    jobs, retries, bad_fields = extract_jobs_checked(page_text)
-
-    if bad_fields:
-        names = "、".join(f"岗位 {i + 1} 的 {name}" for i, name, _ in bad_fields)
-        print(f"      重试 {retries} 次后，这些字段仍没在原文里找到依据：{names}")
-    elif retries:
-        print(f"      重试 {retries} 次后全部通过核对")
+    corp_id = parse_corp_id(url)
+    if corp_id:
+        # 企业页的职位列表是 JS 后加载的，抓 HTML 只能拿到空壳，直接调它的接口
+        print(f"[1/3] 识别为平台企业页，走职位接口：{url}")
+        jobs = fetch_corp_jobs(corp_id)
+        print(f"[2/3] 接口返回 {len(jobs)} 个岗位，没有调用模型")
     else:
-        print("      一次通过核对，所有字段都能在原文里找到依据")
+        print(f"[1/3] 抓取网页：{url}")
+        page_text = fetch_page_text(url)
+        print(f"      正文长度 {len(page_text)} 字符")
+        print("[2/3] 调用模型抽取岗位，并核对每个字段有没有依据...")
+        jobs, retries, bad_fields = extract_jobs_checked(page_text)
 
-    print(f"[3/3] 抽取完成，这个页面共 {len(jobs)} 个岗位")
+        if bad_fields:
+            names = "、".join(f"岗位 {i + 1} 的 {name}" for i, name, _ in bad_fields)
+            print(f"      重试 {retries} 次后，这些字段仍没在原文里找到依据：{names}")
+        elif retries:
+            print(f"      重试 {retries} 次后全部通过核对")
+        else:
+            print("      一次通过核对，所有字段都能在原文里找到依据")
+
+    print(f"[3/3] 完成，这个页面共 {len(jobs)} 个岗位")
     for job in jobs:
         job["url"] = url  # 每个岗位都记下它来自哪个页面
 
