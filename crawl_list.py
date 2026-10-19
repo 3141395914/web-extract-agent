@@ -27,7 +27,8 @@ def format_salary(item):
     low = item.get("lowMonthPay")
     high = item.get("highMonthPay")
     if not low and not high:
-        return ""
+        # 接口没给薪资时，页面上显示的是"面议"
+        return "面议"
     # 接口用 99 表示"薪资面议"，不是一个真的数字
     if high and high >= 99:
         return "面议"
