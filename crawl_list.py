@@ -43,12 +43,21 @@ def fetch_page(keyword, page, headers, retries=3):
     接口偶尔会返回空的 data，或者请求过快被限制，这里重试几次。
     """
     params = {
-        "offset": str(page),
-        "limit": "20",
-        "jobType": "03",
-        "jobName": keyword,
+        "jobType": "",
         "areaCode": "",
+        "jobName": keyword,
+        "monthPay": "",
+        "industrySectors": "",
+        "property": "",
+        "categoryCode": "",
+        "memberLevel": "",
+        "recruitType": "",
+        "offset": str(page),
+        "limit": "10",
+        "keyUnits": "",
         "degreeCode": "",
+        "sourcesName": "0",
+        "sourcesType": "",
     }
 
     for attempt in range(retries):

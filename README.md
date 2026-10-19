@@ -111,12 +111,15 @@ python main.py "网址1" "网址2" "网址3"
 这个脚本按页抓取，结果存成 `output/result_list.csv`：
 
 ```bash
-python crawl_list.py              # 抓全部（当前 200 个职位、10 页）
+python crawl_list.py              # 抓全部（当前 100 个职位、10 页）
 python crawl_list.py Python       # 按关键词抓
 python crawl_list.py Python 3     # 关键词 Python，最多 3 页
 ```
 
-注意：未登录状态下，接口只返回前 5 页（100 条），第 6 页之后返回空。
+参数要和页面上的一致，否则返回的是另一批数据。例如 `jobType` 传 `03` 拿到 200 条，
+传空拿到 100 条，两批内容完全不同。
+
+注意：未登录状态下，接口只返回前 5 页（50 条），第 6 页之后返回空。
 接口里写的 `total: 10` 是页面上显示的总页数，但匿名请求拿不到后面的数据。
 要抓全量需要在请求里带上登录后的 Cookie。
 
