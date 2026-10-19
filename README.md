@@ -105,6 +105,17 @@ python main.py "网址1" "网址2" "网址3"
 
 结果保存在 `output/result.csv`。
 
+### 批量抓取职位列表
+
+国家大学生就业服务平台的职位列表由 JS 加载，背后同样有 JSON 接口。
+这个脚本按页抓取，结果存成 `output/result_list.csv`：
+
+```bash
+python crawl_list.py              # 抓全部（当前 200 个职位、10 页）
+python crawl_list.py Python       # 按关键词抓
+python crawl_list.py Python 3     # 关键词 Python，最多 3 页
+```
+
 ## 目录结构
 
 ```
@@ -114,6 +125,7 @@ extract.py   拼提示词、调用模型、解析返回值、核对不过时重�
 verify.py    核对字段值在原文里有没有依据
 cache.py     把抽取结果存到本地，同一网址第二次不再调用模型
 ncss_api.py  国家大学生就业服务平台的企业页接口，直接拿结构化职位数据
+crawl_list.py  按关键词和页数抓取职位列表
 main.py      命令行入口，串联整个流程并输出 CSV
 tests/       校验器的自测脚本
 ```
