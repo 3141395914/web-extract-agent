@@ -11,6 +11,7 @@
 import csv
 import os
 import sys
+import time
 
 import requests
 
@@ -35,8 +36,11 @@ def format_salary(item):
     return f"{low}-{high}K/月"
 
 
-def fetch_page(keyword, page, headers):
-    """抓一页，返回接口里的 data 部分。"""
+def fetch_page(keyword, page, headers, retries=3):
+    """抓一页，返回接口里的 data 部分。
+
+    接口偶尔会返回空的 data，或者请求过快被限制，这里重试几次。
+    """
     params = {
         "offset": str(page),
         "limit": "20",
@@ -45,9 +49,19 @@ def fetch_page(keyword, page, headers):
         "areaCode": "",
         "degreeCode": "",
     }
-    resp = requests.get(API_URL, params=params, headers=headers, timeout=TIMEOUT)
-    resp.raise_for_status()
-    return resp.json()["data"]
+
+    for attempt in range(retries):
+        try:
+            resp = requests.get(API_URL, params=params, headers=headers, timeout=TIMEOUT)
+            resp.raise_for_status()
+            data = resp.json().get("data")
+            if data:
+                return data
+        except requests.RequestException as e:
+            print(f"    第 {page} 页请求失败：{e}")
+        time.sleep(1)
+
+    return {}
 
 
 def main():
@@ -72,7 +86,12 @@ def main():
 
     for page in range(1, total_pages + 1):
         data = first if page == 1 else fetch_page(keyword, page, headers)
-        for item in data.get("list", []):
+        items = data.get("list") or []
+        if not items:
+            print(f"  第 {page} 页没有数据，跳过")
+            continue
+
+        for item in items:
             job_id = item.get("jobId")
             if job_id in seen:
                 continue
@@ -88,6 +107,7 @@ def main():
                 }
             )
         print(f"  第 {page} 页完成，累计 {len(rows)} 条")
+        time.sleep(0.5)
 
     os.makedirs("output", exist_ok=True)
     with open(OUTPUT_PATH, "w", newline="", encoding="utf-8-sig") as f:
