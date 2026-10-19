@@ -32,7 +32,7 @@ DEFAULT_PARAMS = {
     "property": "",
     "categoryCode": "",
     "memberLevel": "",
-    "recruitType": "",
+    "recruitType": "0",  # 0 是职位，1 是公告；默认只要职位
     "offset": "1",
     "limit": "10",
     "keyUnits": "",
@@ -66,6 +66,9 @@ def parse_url_params(url):
         if key != "_"
     }
     params.setdefault("limit", "10")
+    # 粘贴的地址里如果没选招聘类型，默认也只要职位，不要公告
+    if not params.get("recruitType"):
+        params["recruitType"] = "0"
     return params
 
 

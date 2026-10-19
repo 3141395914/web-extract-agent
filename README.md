@@ -127,6 +127,9 @@ python crawl_list.py "https://www.ncss.cn/student/jobs/jobslist/ajax/?..."   # �
 接口里写的 `total: 10` 是页面上显示的总页数，但匿名请求拿不到后面的数据。
 要抓全量需要在请求里带上登录后的 Cookie。
 
+默认只抓具体职位（`recruitType=0`），不抓招聘公告（`recruitType=1`）。
+如果你就是想抓公告，把参数改成 1。
+
 ## 目录结构
 
 ```
