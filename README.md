@@ -108,13 +108,17 @@ python main.py "网址1" "网址2" "网址3"
 ### 批量抓取职位列表
 
 国家大学生就业服务平台的职位列表由 JS 加载，背后同样有 JSON 接口。
-这个脚本按页抓取，结果存成 `output/result_list.csv`：
+这个脚本按页抓取，结果存成 `output/jobs_时间戳.csv`，每次运行不会覆盖上一次的数据：
 
 ```bash
 python crawl_list.py              # 抓全部（当前 100 个职位、10 页）
 python crawl_list.py Python       # 按关键词抓
 python crawl_list.py Python 3     # 关键词 Python，最多 3 页
+python crawl_list.py "https://www.ncss.cn/student/jobs/jobslist/ajax/?..."   # 粘贴完整请求地址
 ```
+
+最稳妥的方式是粘贴地址：在页面上点好筛选条件，F12 打开 Network，找到 `jobslist/ajax`
+那个请求，复制完整地址，脚本会自动解析参数并翻页。想换分类，就换一个地址。
 
 参数要和页面上的一致，否则返回的是另一批数据。例如 `jobType` 传 `03` 拿到 200 条，
 传空拿到 100 条，两批内容完全不同。
