@@ -126,6 +126,17 @@ python crawl_list.py "https://www.ncss.cn/student/jobs/jobslist/ajax/?..."   # �
 默认只抓具体职位（`recruitType=0`），不抓招聘公告（`recruitType=1`）。
 如果你就是想抓公告，把参数改成 1。
 
+### 合并多个分类的数据
+
+不同分类会生成多个 `jobs_*.csv`，用这个命令合并去重：
+
+```bash
+python merge_csv.py
+```
+
+脚本读取 `output/` 下所有 `jobs_*.csv`，按 `url` 去重，输出 `output/all_jobs.csv`。
+用 url 做去重键，因为同一个职位可能出现在多个分类里，但详情页地址是唯一的。
+
 ## 目录结构
 
 ```
@@ -135,6 +146,7 @@ extract.py   拼提示词、调用模型、解析返回值、核对不过时重�
 verify.py    核对字段值在原文里有没有依据
 cache.py     把抽取结果存到本地，同一网址第二次不再调用模型
 crawl_list.py  按关键词和页数抓取职位列表
+merge_csv.py   合并多个分类的 CSV 并按 url 去重
 main.py      命令行入口，串联整个流程并输出 CSV
 tests/       校验器的自测脚本
 ```
